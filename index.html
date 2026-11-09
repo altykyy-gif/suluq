@@ -16,18 +16,29 @@ main{max-width:720px;margin:0 auto;padding:14px}
 .hero{text-align:center}.hero img{width:170px;height:170px;border-radius:50%;box-shadow:0 4px 18px #0003}
 h2{font-size:1.15rem;color:var(--pr);margin:.2em 0 .6em}h3{font-size:1rem;margin:.8em 0 .3em}
 .q{margin:18px 0}.q>b{display:block}
-input[type=text],textarea,select{width:100%;font:inherit;padding:12px;border:2px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx)}
+input[type=text],input[type=password],textarea,select{width:100%;font:inherit;padding:12px;border:2px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx)}
 textarea{min-height:90px}
+.location-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.location-fields label span,.role-other label span{display:block;font-weight:700;margin-bottom:4px}
+.role-other{margin-top:12px}
 .ch{display:flex;gap:10px;align-items:flex-start;padding:12px;border:2px solid var(--bd);border-radius:14px;margin:8px 0;cursor:pointer}
 .ch input{width:24px;height:24px;margin-top:4px;flex:none;accent-color:var(--pr)}
 .ch:has(input:checked){border-color:var(--pr);background:var(--pr2)}
-.rt{display:flex;gap:6px;margin-top:6px}.rt label{flex:1}.rt input{display:none}
-.rt span{display:block;text-align:center;padding:12px 0;border:2px solid var(--bd);border-radius:12px;font-weight:800;cursor:pointer}
-.rt input:checked+span{background:var(--pr);color:#fff;border-color:var(--pr)}
+.rating-guide{color:var(--mut);margin:0 0 16px}
+.rating{min-width:0;border:0;padding:0}
+.rating legend{padding:0;font-weight:800}
+.rt{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(4px,1.2vw,8px);margin-top:8px;direction:rtl}
+.rt label{display:grid;min-width:0;position:relative;cursor:pointer}
+.rt input{position:absolute;width:1px;height:1px;opacity:0}
+.rating-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:64px;padding:8px 2px;border:2px solid var(--bd);border-radius:12px;background:var(--bg);text-align:center;line-height:1.2}
+.rating-choice strong{font-size:1rem}
+.rating-label{font-size:clamp(11px,.72rem,16px);font-weight:700;overflow-wrap:anywhere}
+.rt input:checked+.rating-choice{background:var(--pr2);border-color:var(--pr);box-shadow:inset 0 0 0 1px var(--pr)}
+.rt input:focus-visible+.rating-choice{outline:2px solid var(--pr);outline-offset:2px}
 .nav{display:flex;gap:10px;margin-top:16px}
 .b,.b2{flex:1;font:800 1.05rem Cairo;padding:14px;border-radius:14px;border:2px solid var(--pr);cursor:pointer}
 .b{background:var(--pr);color:#fff}.b2{background:none;color:var(--pr)}
-.b:disabled{opacity:.5}
+.b:disabled,.b2:disabled{opacity:.5}
 .mut{color:var(--mut);font-size:.85rem}.er{color:var(--er);font-weight:700;min-height:1.5em}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:12px;display:none;z-index:9}
 .tw{overflow:auto;max-height:70vh;border:2px solid var(--bd);border-radius:12px}
@@ -65,9 +76,12 @@ const LOGO='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFB
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 $('#lg').src=LOGO;
-const ROLES=['طالب','معلم','مفتش تربوي','ولي أمر','مهتم بالشأن التعليمي'];
+const OTHER_ROLE='أخرى';
+const ROLES=['معلم/معلمة','مدير/ة مدرسة','موجه تربوي','إداري/إدارية','ولي أمر','طالب/طالبة','باحث/أكاديمي','مؤسسة مجتمع مدني','جهة حكومية','قطاع خاص',OTHER_ROLE];
+const LEGACY_ROLE_NAMES=new Map([['معلم','معلم/معلمة'],['طالب','طالب/طالبة']]);
 const STAGES=['أساسي','متوسط/ثانوي','تقني وفني','جامعي','جميع المراحل'];
 const EXPS=['أقل من 5','5-10','10-20','أكثر من 20'];
+const RATING_LABELS=['ضعيف جدًا','ضعيف','مقبول','جيد','ممتاز'];
 const R=['الجودة الشاملة للمخرجات التعليمية الحالية','ملاءمة المناهج الدراسية لمهارات العصر وسوق العمل','كفاءة برامج تأهيل وتدريب المعلمين والإداريين','جاهزية المباني المدرسية والتجهيزات المعملية والتقنية','توفر الأمان المدرسي وبرامج الإرشاد والدعم النفسي','مستوى التحول الرقمي وتوظيف المنظومات والتكنولوجيا','كفاءة الحوكمة واللامركزية وتفويض الصلاحيات للمناطق','عدالة ومصداقية نظم الامتحانات العامة والتقويم'];
 const AX=['نظام التعليم وفلسفته وأهدافه','المناهج التعليمية وطرائق التدريس والتقويم','المعلم: إعداده، تأهيله، تدريبه وتمكينه','البنية التحتية، البيئة المدرسية الآمنة، والتعليم الشامل','الحوكمة والإدارة، التحول الرقمي، والإعلام التعليمي'];
 // [المعرف، أقصى عدد اختيارات، خانة أخرى، السؤال، الخيارات]
@@ -89,7 +103,7 @@ const Q=[
 ['q53',1,0,'كيف يمكن تعزيز دور الإعلام التعليمي والتواصل المؤسسي؟',['إنشاء منصة إعلامية تفاعلية موحدة تربط الوزارة بالمراقبات والمجتمع','إطلاق حملات توعية إعلامية منتظمة تعزز مكانة المعلم وتستعرض قصص النجاح','إتاحة قنوات مباشرة لتلقي استفسارات وشكاوى الميدان وأولياء الأمور والرد عليها بشفافية','تعزيز دور أقسام الإعلام بالمراقبات التعليمية والمدارس لنشر الأنشطة والمبادرات']]];
 const qn=id=>id[1]+'.'+id[2];
 const COLS=[['time','التاريخ'],['name','الاسم'],['role','الصفة'],['gender','النوع'],['stage','المرحلة'],['region','المراقبة/المنطقة'],['exp','سنوات الخبرة'],['part','شارك في لجان سابقة'],
-...R.map((t,i)=>['r'+(i+1),'تقييم '+(i+1)+': '+t]),...Q.map(q=>[q[0],qn(q[0])+' '+q[3].replace(/\s*\(.*$/,'')]),
+...R.map((t,i)=>['r'+(i+1),'تقييم '+(i+1)+': '+t]),...Q.map(q=>[q[0],qn(q[0])+' '+q[3]]),
 ['o1','أهم 3 تحديات ميدانية'],['o2','الممارسات الناجحة'],['o3','حلول عاجلة (90 يوماً)'],['o4','القرار الاستراتيجي']];
 let A={},S=0,rows=[];
 const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2800)};
@@ -107,14 +121,23 @@ function render(){
  <p><b>شكراً لمشاركتكم في رسم ملامح التعليم في ليبيا للـ 10 سنوات القادمة.</b><br>اللجنة التحضيرية للمؤتمر</p>${nav('ابدأ الاستبيان')}</div>`;
  else if(S==1)h=`<div class="card"><h2>القسم الأول: البيانات الأساسية</h2>
  <div class="q"><b>الاسم الرباعي (إجباري) *</b><input type="text" name="name" placeholder="مثال: أحمد محمد علي سالم" autocomplete="name"><span class="mut">اكتب 4 أسماء على الأقل: الاسم، اسم الأب، اسم الجد، اللقب</span></div>
- <div class="q"><b>الصفة (إجباري) *</b>${ch('role',ROLES,1)}</div>
+ <div class="q"><b>الصفة (إجباري) *</b>${ch('role',ROLES,1)}
+ <div class="role-other" id="role-other" hidden><label><span>اذكر صفتك *</span><input type="text" name="role_other" placeholder="اكتب صفتك"></label></div></div>
  <div class="q"><b>النوع</b>${ch('gender',['ذكر','أنثى'],1)}</div>
  <div class="q"><b>المرحلة التعليمية</b>${ch('stage',STAGES,1)}</div>
- <div class="q"><b>المراقبة التعليمية / المنطقة</b><input type="text" name="region" placeholder="مثال: سلوق"></div>
+ <div class="q location-fields">
+ <label><span>المراقبة التعليمية</span><input type="text" name="supervision" placeholder="اكتب اسم المراقبة التعليمية"></label>
+ <label><span>المنطقة</span><input type="text" name="area" placeholder="اكتب اسم المنطقة"></label>
+ </div>
  <div class="q"><b>سنوات الخبرة</b>${ch('exp',EXPS,1)}</div>
  <div class="q"><b>هل شاركت في لجان/ورش سابقة لتطوير التعليم؟</b>${ch('part',['نعم','لا'],1)}</div>${nav()}</div>`;
- else if(S==2)h=`<div class="card"><h2>القسم الثاني: التقييم العام للمنظومة التعليمية</h2><p>قيّم كل مجال من 1 إلى 5:<br><b>5 ممتاز · 4 جيد · 3 مقبول · 2 ضعيف · 1 ضعيف جداً</b></p>
- ${R.map((t,i)=>`<div class="q"><b>${i+1}. ${t}</b><div class="rt">${[5,4,3,2,1].map(v=>`<label><input type="radio" name="r${i+1}" value="${v}"><span>${v}</span></label>`).join('')}</div></div>`).join('')}${nav()}</div>`;
+ else if(S==2)h=`<div class="card"><h2>القسم الثاني: التقييم العام للمنظومة التعليمية</h2>
+ <p class="rating-guide">اختر درجة واحدة من 1 إلى 5 لكل مجال.</p>
+ ${R.map((t,i)=>`<fieldset class="q rating"><legend>${i+1}. ${t}</legend>
+ <div class="rt" dir="rtl">${RATING_LABELS.map((label,index)=>`<label>
+ <input type="radio" name="r${i+1}" value="${index+1}">
+ <span class="rating-choice"><strong>${index+1}</strong> <span class="rating-label">${label}</span></span>
+ </label>`).join('')}</div></fieldset>`).join('')}${nav()}</div>`;
  else if(S<8){const a=S-2;h=`<div class="card"><h2>القسم الثالث – المحور ${a}: ${AX[a-1]}</h2>${Q.filter(q=>q[0][1]==a).map(q=>`<div class="q"><b>${qn(q[0])} ${q[3]}</b>${ch(q[0],q[4],q[1])}${q[2]?`<input type="text" name="${q[0]}_o" placeholder="أخرى: اكتب هنا (اختياري)">`:''}</div>`).join('')}${nav()}</div>`}
  else h=`<div class="card"><h2>القسم الرابع: استشراف المستقبل والمقترحات (أسئلة مفتوحة)</h2>
  <div class="q"><b>1. التحديات الميدانية: أهم ثلاثة تحديات تواجه قطاع التربية والتعليم في بلديتك أو منطقتك بحسب الأولوية</b><input type="text" name="o1a" placeholder="أ"><br><br><input type="text" name="o1b" placeholder="ب"><br><br><input type="text" name="o1c" placeholder="ج"></div>
@@ -123,28 +146,101 @@ function render(){
  <div class="q"><b>4. صناعة القرار: لو أعطيت صلاحية اتخاذ قرار استراتيجي فوري واحد للنهوض بالتعليم الليبي، فما هو؟</b><textarea name="o4"></textarea></div>${nav('إرسال الاستبيان')}</div>`;
  $('#app').innerHTML=h;$('#bar').style.width=(S/8*100)+'%';
  $$('#app input,#app textarea').forEach(i=>{if(i.type=='radio'||i.type=='checkbox')i.checked=String(A[i.name]||'').split(' | ').includes(i.value);else i.value=A[i.name]||''});
+ if(S===1)showOtherRole();
  scrollTo(0,0)}
 function collect(){const g={};$$('#app input,#app textarea').forEach(i=>{if(i.type=='radio'||i.type=='checkbox'){g[i.name]=g[i.name]||[];if(i.checked)g[i.name].push(i.value)}else A[i.name]=i.value.trim()});for(const k in g)A[k]=g[k].join(' | ')}
-document.addEventListener('change',e=>{const t=e.target;if(t.type=='checkbox'){const n=+t.dataset.n;if($$(`input[name="${t.name}"]:checked`).length>n){t.checked=false;toast('الحد الأقصى للاختيار: '+n)}}});
-function go(d){collect();if(d>0&&S==1){const p=(A.name||'').split(/\s+/).filter(x=>x.length>=2);const e=$('#err');if(p.length<4){e.textContent='يجب كتابة الاسم رباعياً (4 أسماء على الأقل)';return}if(!A.role){e.textContent='اختر صفتك من فضلك';return}}
- if(d>0&&S==8)return submit();S+=d;render()}
+function showOtherRole(){
+ $('#role-other').hidden=$('input[name="role"]:checked')?.value!==OTHER_ROLE;
+}
+document.addEventListener('change',e=>{
+ const t=e.target;
+ if(t.name==='role')showOtherRole();
+ if(t.type==='checkbox'){
+  const n=+t.dataset.n;
+  if($$(`input[name="${t.name}"]:checked`).length>n){
+   t.checked=false;
+   toast('الحد الأقصى للاختيار: '+n);
+  }
+ }
+});
+function go(d){
+ collect();
+ if(d>0&&S===1){
+  const p=(A.name||'').split(/\s+/).filter(x=>x.length>=2);
+  const e=$('#err');
+  if(p.length<4){e.textContent='يجب كتابة الاسم رباعياً (4 أسماء على الأقل)';return}
+  if(!A.role){e.textContent='اختر صفتك من فضلك';return}
+  if(A.role===OTHER_ROLE&&!A.role_other){e.textContent='اذكر صفتك عند اختيار «أخرى».';return}
+ }
+ if(d>0&&S===8)return submit();
+ S+=d;
+ render();
+}
 async function submit(){const d={};COLS.forEach(([k])=>d[k]=A[k]||'');
+ if(A.role===OTHER_ROLE)d.role=OTHER_ROLE+': '+A.role_other;
+ d.region=[
+  A.supervision&&'المراقبة التعليمية: '+A.supervision,
+  A.area&&'المنطقة: '+A.area
+ ].filter(Boolean).join(' | ');
  Q.forEach(q=>{if(A[q[0]+'_o'])d[q[0]]=(d[q[0]]?d[q[0]]+' | ':'')+'أخرى: '+A[q[0]+'_o']});
  d.o1=[A.o1a,A.o1b,A.o1c].filter(Boolean).join(' | ');d.o3=[A.o3a,A.o3b,A.o3c].filter(Boolean).join(' | ');d.time=new Date().toLocaleString('en-GB');
  try{if(API)await fetch(API,{method:'POST',mode:'no-cors',body:JSON.stringify(d)});else{const l=JSON.parse(localStorage.tg_rows||'[]');l.push(d);localStorage.tg_rows=JSON.stringify(l)}
  $('#bar').style.width='100%';$('#app').innerHTML=`<div class="card hero"><img src="${LOGO}" alt=""><h2 style="color:var(--ok)">✔ تم استلام إجاباتك</h2><p>شكراً لك ${esc(d.name)} على مشاركتك في رسم مستقبل التعليم في ليبيا.</p><button class="b" onclick="A={};S=0;render()">تعبئة استبيان جديد</button></div>`;scrollTo(0,0)}
  catch(e){$('#err').textContent='تعذر الإرسال، تأكد من الإنترنت وأعد المحاولة'}}
 // ===== لوحة الإدارة =====
-function admin(){$('#app').innerHTML=`<div class="card" id="login"><h2>دخول الإدارة</h2><input type="text" id="pw" placeholder="كلمة المرور"><div class="er" id="err"></div><div class="nav"><button class="b" onclick="loadRows()">دخول</button></div></div>`}
-async function loadRows(){try{rows=API?await (await fetch(API+'?key='+encodeURIComponent($('#pw').value))).json():JSON.parse(localStorage.tg_rows||'[]');if(!Array.isArray(rows)||(API&&!rows.length)){$('#err').textContent='كلمة المرور خاطئة أو لا توجد ردود بعد';return}}catch(e){$('#err').textContent='تعذر الاتصال';return}
+function admin(){
+ rows=[];
+ $('#app').innerHTML=`<form class="card" id="login"><h2>دخول الإدارة</h2><input type="password" id="pw" placeholder="كلمة المرور" aria-label="كلمة المرور" autocomplete="current-password"><div class="er" id="err" role="status"></div><div class="nav"><button type="submit" class="b" id="login-submit">دخول</button></div></form>`;
+ $('#login').onsubmit=event=>{
+  event.preventDefault();
+  loadRows($('#pw').value,$('#login-submit'));
+ };
+}
+async function loadRows(key,button){
+ const status=$('#err');
+ if(button.disabled)return;
+ if(API&&!key){status.textContent='أدخل كلمة المرور';return}
+ button.disabled=true;
+ status.textContent='';
+ try{
+  let loaded;
+  if(API){
+   const response=await fetch(API+'?key='+encodeURIComponent(key),{cache:'no-store'});
+   if(!response.ok)throw new Error('تعذر جلب الردود');
+   loaded=await response.json();
+  }else{
+   loaded=JSON.parse(localStorage.tg_rows||'[]');
+  }
+  if(!status.isConnected)return;
+  if(!Array.isArray(loaded)||(API&&!loaded.length)){
+   status.textContent='كلمة المرور خاطئة أو لا توجد ردود بعد';
+   return;
+  }
+  rows=loaded;
+  if(button.id==='refresh')fill();
+  else renderAdmin(key);
+ }catch{
+  if(status.isConnected)status.textContent='تعذر الاتصال أو قراءة الردود';
+ }finally{
+  button.disabled=false;
+ }
+}
+function renderAdmin(key){
  $('#app').innerHTML=`<div id="ph"><img src="${LOGO}" alt=""><h2>مراقبة التربية والتعليم – بلدية سلوق</h2><b>كشف ردود الاستبيان الوطني الموحد</b><div id="pc"></div></div>
  <div class="card noprint"><b id="cnt"></b>${API?'':'<div class="mut">وضع تجريبي محلي (لم يُضبط رابط الاستضافة)</div>'}<input type="text" id="gs" placeholder="🔍 بحث في كل الأعمدة" style="margin-top:8px">
- <div class="bar2"><button class="b" onclick="xl()">تحميل Excel</button><button class="b2" onclick="pr('t')">طباعة الكشف</button><button class="b2" onclick="pr('c')">طباعة تفصيلية</button><button class="b2" onclick="loadRows()">تحديث</button></div></div>
+ <div class="bar2"><button class="b" onclick="xl()">تحميل Excel</button><button class="b2" onclick="pr('t')">طباعة الكشف</button><button class="b2" onclick="pr('c')">طباعة تفصيلية</button><button class="b2" id="refresh">تحديث</button></div><div class="er" id="err" role="status"></div></div>
  <div class="card noprint" id="chs"></div>
  <div class="tw"><table><thead><tr><th>#</th>${COLS.map((c,i)=>`<th class="${i>7?'x':''}">${c[1]}<br><input class="fl" data-k="${c[0]}" placeholder="فلترة"></th>`).join('')}</tr></thead><tbody id="tb"></tbody></table></div><div id="cards"></div>`;
+ $('#refresh').onclick=event=>loadRows(key,event.currentTarget);
  $$('.fl,#gs').forEach(i=>i.oninput=fill);fill()}
+function roleCategory(value){
+ const role=String(value??'').trim();
+ if(role.startsWith(OTHER_ROLE+':'))return OTHER_ROLE;
+ return LEGACY_ROLE_NAMES.get(role)??role;
+}
 function flt(){const f={};$$('.fl').forEach(i=>{if(i.value.trim())f[i.dataset.k]=i.value.trim().toLowerCase()});const g=($('#gs').value||'').trim().toLowerCase();
- return rows.filter(r=>Object.keys(f).every(k=>String(r[k]??'').toLowerCase().includes(f[k]))&&(!g||COLS.some(([k])=>String(r[k]??'').toLowerCase().includes(g))))}
+ const matches=(row,key,query)=>String(row[key]??'').toLowerCase().includes(query)||(key==='role'&&roleCategory(row[key]).toLowerCase().includes(query));
+ return rows.filter(r=>Object.keys(f).every(k=>matches(r,k,f[k]))&&(!g||COLS.some(([k])=>matches(r,k,g))))}
 function fill(){const v=flt();$('#tb').innerHTML=v.map((r,n)=>`<tr><td>${n+1}</td>${COLS.map(([k],i)=>`<td class="${i>7?'x':''}">${esc(r[k])}</td>`).join('')}</tr>`).join('');$('#cnt').textContent=`عدد الردود: ${v.length} من ${rows.length}`;charts(v)}
 const SC=['','#c0262d','#e69138','#f1c232','#6aa84f','#0a7a3d'];
 function charts(v){
@@ -153,8 +249,16 @@ function charts(v){
  if(!ok.length){el.innerHTML='<h2>ملخص التقييمات</h2><p class="mut">لا توجد تقييمات لعرضها.</p>';return}
  const all=ok.reduce((a,x)=>a+x.a,0)/ok.length,hi=ok.reduce((a,x)=>x.a>a.a?x:a),lo=ok.reduce((a,x)=>x.a<a.a?x:a);
  const sh=t=>t.length>32?t.slice(0,32)+'…':t,f=x=>x.toFixed(2);
- const lg=[5,4,3,2,1].map(i=>`<span><i style="background:${SC[i]}"></i>${['','ضعيف جداً','ضعيف','مقبول','جيد','ممتاز'][i]} (${i})</span>`).join('');
- const roles=ROLES.map(x=>[x,v.filter(r=>r.role==x).length]),mx=Math.max(1,...roles.map(r=>r[1]));
+ const lg=[5,4,3,2,1].map(i=>`<span><i style="background:${SC[i]}"></i>${RATING_LABELS[i-1]} (${i})</span>`).join('');
+ const roles=new Map(ROLES.map(role=>[role,0]));
+ let mx=1;
+ for(const row of v){
+  const role=roleCategory(row.role);
+  if(!role)continue;
+  const count=(roles.get(role)??0)+1;
+  roles.set(role,count);
+  mx=Math.max(mx,count);
+ }
  el.innerHTML=`<h2>ملخص التقييمات</h2>
  <div class="kp"><div><b>${v.length}</b>عدد الردود</div><div><b>${f(all)} / 5</b>المتوسط العام</div><div><b>${f(hi.a)}</b>الأعلى: ${esc(sh(hi.t))}</div><div><b>${f(lo.a)}</b>الأدنى: ${esc(sh(lo.t))}</div></div>
  <h3>متوسط التقييم لكل مجال (من 5)</h3>
@@ -162,13 +266,131 @@ function charts(v){
  <h3>توزيع التقييمات لكل مجال (٪)</h3><div class="lg">${lg}</div>
  ${D.map((x,i)=>`<div class="cr"><span>${i+1}. ${esc(x.t)}</span><div class="tk" style="height:22px">${[5,4,3,2,1].map(j=>{const p=x.m?x.c[j]/x.m*100:0;return p?`<i title="${x.c[j]}" style="width:${p}%;background:${SC[j]};${j==3?'color:#222;':''}line-height:22px">${p>=9?Math.round(p)+'%':''}</i>`:''}).join('')}</div></div>`).join('')}
  <h3>المشاركون حسب الصفة</h3>
- ${roles.map(([n,c])=>`<div class="cr"><span>${n}</span><div class="tr"><div class="tk"><i style="width:${c/mx*100}%;background:var(--pr)"></i></div><div class="vl">${c}</div></div></div>`).join('')}`}
+ ${[...roles].map(([n,c])=>`<div class="cr"><span>${esc(n)}</span><div class="tr"><div class="tk"><i style="width:${c/mx*100}%;background:var(--pr)"></i></div><div class="vl">${c}</div></div></div>`).join('')}`}
 function pr(m){const v=flt();$('#pc').textContent='عدد الردود: '+v.length+' — التاريخ: '+new Date().toLocaleDateString('en-GB');
  if(m=='c')$('#cards').innerHTML=v.map((r,n)=>`<div class="c2"><h3>${n+1}. ${esc(r.name)} — ${esc(r.role)} (${esc(r.time)})</h3>${COLS.slice(3).filter(([k])=>r[k]).map(([k,l])=>`<p><b>${esc(l)}:</b> ${esc(r[k])}</p>`).join('')}</div>`).join('');
  document.body.dataset.pm=m;print()}
-function xl(){const v=flt();const t=`<html dir="rtl"><head><meta charset="utf-8"></head><body><table border="1"><tr>${COLS.map(c=>`<th>${esc(c[1])}</th>`).join('')}</tr>${v.map(r=>`<tr>${COLS.map(([k])=>`<td>${esc(r[k])}</td>`).join('')}</tr>`).join('')}</table></body></html>`;
- const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'application/vnd.ms-excel'}));a.download='ردود_الاستبيان.xls';a.click()}
-function route(){location.hash=='#admin'?admin():(S=0,render())}
+const XLSX_TYPE='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+function xlsxColumn(number){
+ let letters='';
+ while(number>0){
+  number--;
+  letters=String.fromCharCode(65+number%26)+letters;
+  number=Math.floor(number/26);
+ }
+ return letters;
+}
+
+function xlsxText(value){
+ const text=String(value??'');
+ if(text.length>32767)throw new RangeError('يوجد رد يتجاوز الحد الأقصى لطول خلية Excel (32767 حرفاً).');
+ return esc(text
+  .replace(/[^\u0009\u000A\u000D\u0020-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu,'\uFFFD')
+  .replace(/_(?=x[0-9a-f]{4}_)/gi,'_x005F_')
+ ).replace(/\r/g,'&#13;');
+}
+
+// أجزاء المصنف داخل حاوية ZIP دون ضغط أو مكتبات خارجية.
+function xlsxZip(parts){
+ const encoder=new TextEncoder();
+ const crcTable=new Uint32Array(256);
+ for(let index=0;index<crcTable.length;index++){
+  let crc=index;
+  for(let bit=0;bit<8;bit++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);
+  crcTable[index]=crc;
+ }
+ const files=[],directory=[];
+ const entries=Object.entries(parts);
+ let offset=0,directorySize=0;
+ for(const [name,xml] of entries){
+  const fileName=encoder.encode(name);
+  const data=encoder.encode('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+xml);
+  let crc=0xffffffff;
+  for(const byte of data)crc=(crc>>>8)^crcTable[(crc^byte)&0xff];
+  crc=(crc^0xffffffff)>>>0;
+  const local=new DataView(new ArrayBuffer(30));
+  local.setUint32(0,0x04034b50,true);
+  local.setUint16(4,20,true);
+  local.setUint16(12,33,true);
+  local.setUint32(14,crc,true);
+  local.setUint32(18,data.length,true);
+  local.setUint32(22,data.length,true);
+  local.setUint16(26,fileName.length,true);
+  files.push(local.buffer,fileName,data);
+  const central=new DataView(new ArrayBuffer(46));
+  central.setUint32(0,0x02014b50,true);
+  central.setUint16(4,20,true);
+  // حقول الإصدار والوقت والأحجام والاسم متماثلة في الرأسين.
+  new Uint8Array(central.buffer,6,26).set(new Uint8Array(local.buffer,4,26));
+  central.setUint32(42,offset,true);
+  directory.push(central.buffer,fileName);
+  offset+=local.byteLength+fileName.length+data.length;
+  directorySize+=central.byteLength+fileName.length;
+ }
+ if(offset+directorySize+22>0xffffffff)throw new RangeError('حجم الملف كبير. استخدم الفلاتر لتصدير الردود على دفعات.');
+ const end=new DataView(new ArrayBuffer(22));
+ end.setUint32(0,0x06054b50,true);
+ end.setUint16(8,entries.length,true);
+ end.setUint16(10,entries.length,true);
+ end.setUint32(12,directorySize,true);
+ end.setUint32(16,offset,true);
+ return new Blob([...files,...directory,end.buffer],{type:XLSX_TYPE});
+}
+
+function xlsxBlob(records){
+ if(records.length>1048575)throw new RangeError('عدد الردود يتجاوز سعة ورقة Excel. استخدم الفلاتر لتصديرها على دفعات.');
+ const columns=COLS.map((_,index)=>xlsxColumn(index+1));
+ const rowXml=(record,number)=>{
+  const cells=COLS.map(([key,label],index)=>{
+   const value=number===1?label:record[key]??'';
+   if(value==='')return '';
+   const ref=columns[index]+number;
+   if(number>1&&/^r[1-8]$/.test(key)&&/^[1-5]$/.test(value)){
+    return `<c r="${ref}"><v>${value}</v></c>`;
+   }
+   return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xlsxText(value)}</t></is></c>`;
+  }).join('');
+  return `<row r="${number}">${cells}</row>`;
+ };
+ const ns='http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+ const docRel='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+ const pkgRel='http://schemas.openxmlformats.org/package/2006/relationships';
+ const content='application/vnd.openxmlformats-officedocument.spreadsheetml';
+ const range=`A1:${columns[columns.length-1]}${records.length+1}`;
+ return xlsxZip({
+  '[Content_Types].xml':`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="${content}.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="${content}.worksheet+xml"/></Types>`,
+  '_rels/.rels':`<Relationships xmlns="${pkgRel}"><Relationship Id="rId1" Type="${docRel}/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+  'xl/workbook.xml':`<workbook xmlns="${ns}" xmlns:r="${docRel}"><bookViews><workbookView/></bookViews><sheets><sheet name="ردود الاستبيان" sheetId="1" r:id="rId1"/></sheets></workbook>`,
+  'xl/_rels/workbook.xml.rels':`<Relationships xmlns="${pkgRel}"><Relationship Id="rId1" Type="${docRel}/worksheet" Target="worksheets/sheet1.xml"/></Relationships>`,
+  'xl/worksheets/sheet1.xml':`<worksheet xmlns="${ns}"><dimension ref="${range}"/><sheetViews><sheetView workbookViewId="0" rightToLeft="1"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultColWidth="24" defaultRowHeight="15"/><sheetData>${rowXml(null,1)}${records.map((row,index)=>rowXml(row,index+2)).join('')}</sheetData><autoFilter ref="${range}"/></worksheet>`
+ });
+}
+
+function xl(){
+ const status=$('#err');
+ status.textContent='';
+ try{
+  const blob=xlsxBlob(flt());
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download='suluq-survey-responses.xlsx';
+  document.body.appendChild(link);
+  try{link.click()}finally{
+   link.remove();
+   setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+ }catch(error){
+  status.textContent=error instanceof RangeError?error.message:'تعذر إنشاء ملف Excel.';
+ }
+}
+function route(){
+ if(location.hash==='#admin'){admin();return}
+ rows=[];
+ S=0;
+ render();
+}
 addEventListener('hashchange',route);route();
 </script>
 <noscript>يلزم تفعيل جافاسكربت</noscript>
